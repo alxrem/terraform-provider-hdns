@@ -1,0 +1,4 @@
+/.idea/
+/vendor/
+/terraform-provider-hdns
+/example

@@ -1,0 +1,103 @@
+package hdns
+
+import (
+	"context"
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"gitlab.com/alxrem/hdns-go/hdns"
+	"testing"
+)
+
+func TestAccHdnsRecord_Basic(t *testing.T) {
+	var record hdns.Record
+	rName := acctest.RandomWithPrefix("hdns-testacc")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccHdnsPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccHdnsCheckRecordDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccHdnsCheckRecordConfig_basic(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccHdnsCheckRecordExists("hdns_record.bar", &record),
+					resource.TestCheckResourceAttr(
+						"hdns_record.bar", "name", "www"),
+					resource.TestCheckResourceAttr(
+						"hdns_record.bar", "ttl", "86400"),
+				),
+			},
+		},
+	})
+}
+
+//noinspection GoSnakeCaseUsage
+func testAccHdnsCheckRecordConfig_basic(rName string) string {
+	return fmt.Sprintf(`
+resource "hdns_zone" "foo" {
+  name = "%s.dev"
+}
+
+resource "hdns_record" "bar" {
+  name    = "www"
+  type    = "A"
+  value   = "1.1.1.1"
+  zone_id = hdns_zone.foo.id 
+}
+`, rName)
+}
+
+func testAccHdnsCheckRecordDestroy(s *terraform.State) error {
+	config := testAccProvider.Meta().(*providerConfig)
+	client := config.client
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "hdns_record" {
+			continue
+		}
+
+		record, r, err := client.Record.GetByID(context.Background(), rs.Primary.ID)
+		if err != nil && r != nil && r.StatusCode != 404 {
+			return fmt.Errorf(
+				"error checking if Record (%s) is deleted: %v",
+				rs.Primary.ID, err)
+		}
+		if record != nil {
+			return fmt.Errorf("record (%s) has not been deleted", rs.Primary.ID)
+		}
+	}
+
+	return nil
+}
+
+func testAccHdnsCheckRecordExists(r string, record *hdns.Record) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[r]
+
+		if !ok {
+			return fmt.Errorf("not found: %s", r)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("no Record ID is set")
+		}
+
+		config := testAccProvider.Meta().(*providerConfig)
+		client := config.client
+
+		// Try to find the key
+		foundRecord, _, err := client.Record.GetByID(context.Background(), rs.Primary.ID)
+		if err != nil {
+			return err
+		}
+
+		if foundRecord == nil {
+			return fmt.Errorf("record not found")
+		}
+
+		*record = *foundRecord
+		return nil
+	}
+}
