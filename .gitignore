@@ -2,3 +2,4 @@
 /vendor/
 /terraform-provider-hdns
 /example
+*.log
