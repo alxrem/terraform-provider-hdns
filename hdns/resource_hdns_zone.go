@@ -102,6 +102,9 @@ func resourceZoneRead(d *schema.ResourceData, m interface{}) error {
 
 	z, _, err := config.client.Zone.GetByID(ctx, id)
 	if err != nil {
+		if resourceZoneIsNotFound(err, d) {
+			return nil
+		}
 		return err
 	}
 

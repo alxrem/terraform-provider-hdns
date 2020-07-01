@@ -87,6 +87,9 @@ func resourceRecordRead(d *schema.ResourceData, m interface{}) error {
 
 	record, _, err := config.client.Record.GetByID(ctx, id)
 	if err != nil {
+		if resourceRecordIsNotFound(err, d) {
+			return nil
+		}
 		return err
 	}
 
