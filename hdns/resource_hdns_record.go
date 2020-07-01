@@ -44,13 +44,24 @@ func resourceRecord() *schema.Resource {
 func resourceRecordCreate(d *schema.ResourceData, m interface{}) error {
 	config := m.(*providerConfig)
 	ctx := context.Background()
+
+	zoneID := d.Get("zone_id").(string)
 	opts := hdns.RecordCreateOpts{
 		Name:   d.Get("name").(string),
 		TTL:    d.Get("ttl").(int),
 		Type:   d.Get("type").(string),
 		Value:  d.Get("value").(string),
-		ZoneID: d.Get("zone_id").(string),
+		ZoneID: zoneID,
 	}
+
+	mu := config.Mutex(zoneID)
+	defer func() {
+		mu.Unlock()
+		log.Printf("[DEBUG] Released lock for zone %s", zoneID)
+	}()
+
+	mu.Lock()
+	log.Printf("[DEBUG] Acquired lock for zone %s", zoneID)
 
 	record, _, err := config.client.Record.Create(ctx, opts)
 	if err != nil {
@@ -93,13 +104,23 @@ func resourceRecordUpdate(d *schema.ResourceData, m interface{}) error {
 	config := m.(*providerConfig)
 	ctx := context.Background()
 
+	zoneID := d.Get("zone_id").(string)
 	opts := hdns.RecordUpdateOpts{
 		Name:   d.Get("name").(string),
 		TTL:    d.Get("ttl").(int),
-		Type:   d.Get("ttl").(string),
+		Type:   d.Get("type").(string),
 		Value:  d.Get("value").(string),
-		ZoneID: d.Get("zone_id").(string),
+		ZoneID: zoneID,
 	}
+
+	mu := config.Mutex(zoneID)
+	defer func() {
+		mu.Unlock()
+		log.Printf("[DEBUG] Released lock for zone %s", zoneID)
+	}()
+
+	mu.Lock()
+	log.Printf("[DEBUG] Acquired lock for zone %s", zoneID)
 
 	_, _, err := config.client.Record.Update(ctx, d.Id(), opts)
 	if err != nil {
@@ -117,6 +138,16 @@ func resourceRecordDelete(d *schema.ResourceData, m interface{}) error {
 	ctx := context.Background()
 
 	id := d.Id()
+
+	zoneID := d.Get("zone_id").(string)
+	mu := config.Mutex(zoneID)
+	defer func() {
+		mu.Unlock()
+		log.Printf("[DEBUG] Released lock for zone %s", zoneID)
+	}()
+
+	mu.Lock()
+	log.Printf("[DEBUG] Acquired lock for zone %s", zoneID)
 
 	r, err := config.client.Record.Delete(ctx, id)
 	if err != nil && r != nil && r.StatusCode != 404 {

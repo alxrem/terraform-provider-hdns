@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"gitlab.com/alxrem/hdns-go/hdns"
+	"sync"
 )
 
 func Provider() terraform.ResourceProvider {
@@ -27,6 +28,12 @@ func Provider() terraform.ResourceProvider {
 
 type providerConfig struct {
 	client *hdns.Client
+	mu     sync.Map
+}
+
+func (pc *providerConfig) Mutex(key interface{}) *sync.Mutex {
+	mu, _ := pc.mu.LoadOrStore(key, &sync.Mutex{})
+	return mu.(*sync.Mutex)
 }
 
 func configureProvider(d *schema.ResourceData) (interface{}, error) {
