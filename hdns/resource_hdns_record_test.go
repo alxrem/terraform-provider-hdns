@@ -30,6 +30,11 @@ func TestAccHdnsRecord_Create(t *testing.T) {
 					resource.TestCheckResourceAttrSet("hdns_record.bar", "zone_id"),
 				),
 			},
+			{
+				ResourceName:      "hdns_record.bar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

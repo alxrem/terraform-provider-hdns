@@ -55,6 +55,11 @@ func TestAccHdnsZone_Basic(t *testing.T) {
 						"hdns_zone.foobar", "ttl", "1800"),
 				),
 			},
+			{
+				ResourceName:      "hdns_zone.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

@@ -14,6 +14,9 @@ func resourceRecord() *schema.Resource {
 		Read:   resourceRecordRead,
 		Update: resourceRecordUpdate,
 		Delete: resourceRecordDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"name": {
