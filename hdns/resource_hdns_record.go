@@ -72,7 +72,7 @@ func resourceRecordCreate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("failed to create record \"%s %s\" in the zone %s: %s", opts.Type, opts.Name, opts.ZoneID, err.Error())
 	}
 
-	if _, _, err := config.client.Record.GetByID(ctx, record.ID); err != nil {
+	if record, _, err := config.client.Record.GetByID(ctx, record.ID); record == nil && err == nil {
 		return fmt.Errorf("failed to create record \"%s %s\" in the zone %s: record is not exists just after creation", opts.Type, opts.Name, opts.ZoneID)
 	}
 
@@ -95,10 +95,12 @@ func resourceRecordRead(d *schema.ResourceData, m interface{}) error {
 
 	record, _, err := config.client.Record.GetByID(ctx, id)
 	if err != nil {
-		if resourceRecordIsNotFound(err, d) {
-			return nil
-		}
 		return fmt.Errorf("failed to read record %s: %s", id, err.Error())
+	}
+	if record == nil {
+		log.Printf("[WARN] Record (%s) not found, removing from state", id)
+		d.SetId("")
+		return nil
 	}
 
 	d.SetId(record.ID)

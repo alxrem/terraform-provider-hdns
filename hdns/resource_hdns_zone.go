@@ -105,10 +105,12 @@ func resourceZoneRead(d *schema.ResourceData, m interface{}) error {
 
 	z, _, err := config.client.Zone.GetByID(ctx, id)
 	if err != nil {
-		if resourceZoneIsNotFound(err, d) {
-			return nil
-		}
 		return err
+	}
+	if z == nil {
+		log.Printf("[WARN] Zone (%s) not found, removing from state", id)
+		d.SetId("")
+		return nil
 	}
 
 	d.SetId(z.ID)
