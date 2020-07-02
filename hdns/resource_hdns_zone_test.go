@@ -3,10 +3,10 @@ package hdns
 import (
 	"context"
 	"fmt"
+	"github.com/alxrem/hdns-go/hdns"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"gitlab.com/alxrem/hdns-go/hdns"
 	"log"
 	"os"
 	"strings"

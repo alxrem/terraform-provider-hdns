@@ -12,7 +12,7 @@ test: $(SOURCES)
 
 .PHONY: testacc
 testacc: $(SOURCES)
-	TF_ACC=1 go test ./... -v -timeout 30m -run TestAccHdnsRecord_Basic
+	TF_ACC=1 go test ./... -v -timeout 30m
 
 .PHONY: sweep
 sweep:

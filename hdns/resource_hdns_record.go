@@ -2,8 +2,9 @@ package hdns
 
 import (
 	"context"
+	"fmt"
+	"github.com/alxrem/hdns-go/hdns"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"gitlab.com/alxrem/hdns-go/hdns"
 	"log"
 )
 
@@ -65,7 +66,11 @@ func resourceRecordCreate(d *schema.ResourceData, m interface{}) error {
 
 	record, _, err := config.client.Record.Create(ctx, opts)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create record \"%s %s\" in the zone %s: %s", opts.Type, opts.Name, opts.ZoneID, err.Error())
+	}
+
+	if _, _, err := config.client.Record.GetByID(ctx, record.ID); err != nil {
+		return fmt.Errorf("failed to create record \"%s %s\" in the zone %s: record is not exists just after creation", opts.Type, opts.Name, opts.ZoneID)
 	}
 
 	d.SetId(record.ID)
@@ -90,7 +95,7 @@ func resourceRecordRead(d *schema.ResourceData, m interface{}) error {
 		if resourceRecordIsNotFound(err, d) {
 			return nil
 		}
-		return err
+		return fmt.Errorf("failed to read record %s: %s", id, err.Error())
 	}
 
 	d.SetId(record.ID)
@@ -130,7 +135,7 @@ func resourceRecordUpdate(d *schema.ResourceData, m interface{}) error {
 		if resourceRecordIsNotFound(err, d) {
 			return nil
 		}
-		return err
+		return fmt.Errorf("failed to create record \"%s %s\" in the zone %s: %s", opts.Type, opts.Name, opts.ZoneID, err.Error())
 	}
 
 	return resourceRecordRead(d, m)
@@ -154,7 +159,7 @@ func resourceRecordDelete(d *schema.ResourceData, m interface{}) error {
 
 	r, err := config.client.Record.Delete(ctx, id)
 	if err != nil && r != nil && r.StatusCode != 404 {
-		return err
+		return fmt.Errorf("failed to delete record %s: %s", id, err.Error())
 	}
 
 	d.SetId("")

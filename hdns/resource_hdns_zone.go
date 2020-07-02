@@ -2,8 +2,8 @@ package hdns
 
 import (
 	"context"
+	"github.com/alxrem/hdns-go/hdns"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"gitlab.com/alxrem/hdns-go/hdns"
 	"log"
 )
 

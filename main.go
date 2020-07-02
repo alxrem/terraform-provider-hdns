@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/alxrem/terraform-provider-hdns/hdns"
 	"github.com/hashicorp/terraform-plugin-sdk/plugin"
-	"gitlab.com/alxrem/terraform-provider-hdns/hdns"
 )
 
 func main() {

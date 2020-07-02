@@ -1,11 +1,11 @@
 package hdns
 
 import (
+	"github.com/alxrem/hdns-go/hdns"
 	"github.com/hashicorp/logutils"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/logging"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"gitlab.com/alxrem/hdns-go/hdns"
 	"sync"
 )
 
