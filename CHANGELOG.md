@@ -1,5 +1,11 @@
 ## 0.3.0 (Unreleased)
 
+## 0.2.1 (December 9, 2021)
+
+NOTES:
+
+* Updated README
+
 ## 0.2.0 (July 5, 2020)
 
 IMPROVEMENTS:
